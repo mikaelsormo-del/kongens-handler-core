@@ -1,9 +1,13 @@
 const assert = require("assert");
-const { solveVerificationChallenge, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, mayUpvote, hasRequiredLinks, safeStep } = require("../src/core");
+const { solveVerificationChallenge, solveVerificationDetailed, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, mayUpvote, hasRequiredLinks, safeStep } = require("../src/core");
 
 assert.equal(solveVerificationChallenge("swims at twenty three meters and accelerates by five"), "28.00");
 assert.equal(solveVerificationChallenge("twelve plus seven"), "19.00");
+assert.equal(solveVerificationChallenge("25 plus 15 gives the total"), "40.00");
+assert.equal(solveVerificationChallenge("35 decreases by 12; what is the new speed?"), "23.00");
+assert.equal(solveVerificationDetailed("3 times 5").checksAgree, true);
 assert.throws(() => solveVerificationChallenge("twelve maybe seven"));
+assert.throws(() => solveVerificationChallenge("one lobster has twenty plus five"));
 
 const good = scoreDecision({ act: true, scores: { relevance: 2, originality: 2, usefulness: 2, truth: 2, relationship: 1, style: 1 }, content: "The shared verifier creates correlated error." });
 assert.equal(good.act, true);
