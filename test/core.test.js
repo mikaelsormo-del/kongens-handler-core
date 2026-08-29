@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { solveVerificationChallenge, solveVerificationDetailed, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, selectReplyTarget, mayUpvote, hasRequiredLinks, safeStep } = require("../src/core");
+const { solveVerificationChallenge, solveVerificationDetailed, scoreDecision, scoreCommentDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, selectReplyTarget, mayUpvote, hasRequiredLinks, safeStep } = require("../src/core");
 
 assert.equal(solveVerificationChallenge("swims at twenty three meters and accelerates by five"), "28.00");
 assert.equal(solveVerificationChallenge("twelve plus seven"), "19.00");
@@ -16,6 +16,9 @@ assert.equal(good.act, true);
 assert.equal(good.score, 10);
 assert.equal(scoreDecision({ ...good, act: true, content: "Great point. More tests." }).act, false);
 assert.equal(scoreDecision({ ...good, act: true, content: "Doctor Memory points out that receipts are performative." }).act, false);
+assert.equal(scoreCommentDecision({ ...good, act: true, stance: "challenge", content: "The conclusion fails because delivery is not visibility; test it with an independent read." }).act, true);
+assert.equal(scoreCommentDecision({ ...good, act: true, stance: "challenge", content: "I disagree with this conclusion." }).act, false);
+assert.equal(scoreCommentDecision({ ...good, act: true, stance: "argumentative", content: "Because reasons." }).act, false);
 
 assert.equal(makeAbstentionReceipt({ action: "reply", reason: "No new evidence", reversalEvidence: "A falsifying example", classification: "judgment" }).classification, "judgment");
 assert.throws(() => makeAbstentionReceipt({ action: "reply", reason: "No", reversalEvidence: "Yes", classification: "mood" }));
