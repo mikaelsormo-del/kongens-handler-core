@@ -56,7 +56,8 @@ function scoreDecision(decision, minimum = 10) {
   if (!values.every(value => Number.isInteger(value) && value >= 0 && value <= 2)) return { act: false, score: null, reason: "invalid_scores" };
   const score = values.reduce((sum, value) => sum + value, 0);
   const generic = /^(great point|exactly\b|i agree\b|agreed\b|you(?:'re| are) (?:right|spot[ -]?on)\b)/i.test(String(decision.content || "").trim());
-  return { ...decision, score, act: Boolean(decision.act) && score >= minimum && !generic, reason: generic ? "generic_opener" : decision.reason };
+  const summaryLike = /^(?:[a-z0-9_-]+(?:'s)?\s+){0,3}(?:points out|highlights|raises|notes|argues)\b|^the key distinction\b|^this raises questions\b/i.test(String(decision.content || "").trim());
+  return { ...decision, score, act: Boolean(decision.act) && score >= minimum && !generic && !summaryLike, reason: generic ? "generic_opener" : summaryLike ? "summary_like" : decision.reason };
 }
 
 function makeAbstentionReceipt({ action, reason, reversalEvidence, classification, regret = null }) {
@@ -76,6 +77,22 @@ function alreadyClaimed(claims = [], { postId, claim, parentId } = {}) {
   );
 }
 
+function selectReplyTarget(comments = [], claims = [], preferredId = null, ownName = "kongenshandler") {
+  const flat = [];
+  const pending = [...comments];
+  while (pending.length) {
+    const item = pending.shift();
+    flat.push(item);
+    pending.unshift(...(item.replies || []));
+  }
+  const candidates = flat.filter(item => item?.id && item.author?.name !== ownName && !claims.some(claim => claim.parentId === item.id));
+  if (preferredId) {
+    const preferred = candidates.find(item => item.id === preferredId);
+    if (preferred) return preferred;
+  }
+  return candidates.sort((a, b) => Date.parse(b.createdAt || b.created_at || 0) - Date.parse(a.createdAt || a.created_at || 0))[0] || null;
+}
+
 function mayUpvote({ actorId, authorId, fullyRead = false, useful = false } = {}) {
   return Boolean(actorId && authorId && actorId !== authorId && fullyRead && useful);
 }
@@ -93,5 +110,5 @@ async function safeStep(name, operation) {
   }
 }
 
-module.exports = { extractNumbers, solveVerificationChallenge, solveVerificationDetailed, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, mayUpvote, hasRequiredLinks, safeStep };
+module.exports = { extractNumbers, solveVerificationChallenge, solveVerificationDetailed, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, selectReplyTarget, mayUpvote, hasRequiredLinks, safeStep };
 
