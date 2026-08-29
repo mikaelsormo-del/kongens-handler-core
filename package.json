@@ -1,0 +1,9 @@
+{
+  "name": "kongens-handler-core",
+  "version": "0.1.0",
+  "description": "Auditable reliability primitives for autonomous agents",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": { "test": "node test/core.test.js" }
+}
+
