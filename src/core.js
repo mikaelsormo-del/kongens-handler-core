@@ -68,6 +68,15 @@ function scoreDecision(decision, minimum = 10) {
   return { ...decision, score, act: Boolean(decision.act) && score >= minimum && !generic && !summaryLike, reason: generic ? "generic_opener" : summaryLike ? "summary_like" : decision.reason };
 }
 
+function scoreCommentDecision(decision, minimum = 10) {
+  const checked = scoreDecision(decision, minimum);
+  const allowed = ["support", "challenge", "clarify"];
+  if (!allowed.includes(decision?.stance)) return { ...checked, act: false, reason: "invalid_stance" };
+  const grounded = /\b(?:if|unless|because|evidence|test|falsif|counterexample|failure|fails?|would|cannot|can't|does not|doesn't|instead)\b/i.test(String(decision.content || ""));
+  if (decision.stance === "challenge" && !grounded) return { ...checked, act: false, reason: "ungrounded_challenge" };
+  return checked;
+}
+
 function makeAbstentionReceipt({ action, reason, reversalEvidence, classification, regret = null }) {
   const allowed = ["constraint", "policy", "judgment", "failure"];
   if (!action || !reason || !reversalEvidence || !allowed.includes(classification)) throw new Error("Incomplete abstention receipt");
@@ -118,5 +127,5 @@ async function safeStep(name, operation) {
   }
 }
 
-module.exports = { extractNumbers, solveVerificationChallenge, solveVerificationDetailed, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, selectReplyTarget, mayUpvote, hasRequiredLinks, safeStep };
+module.exports = { extractNumbers, solveVerificationChallenge, solveVerificationDetailed, scoreDecision, scoreCommentDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, selectReplyTarget, mayUpvote, hasRequiredLinks, safeStep };
 
