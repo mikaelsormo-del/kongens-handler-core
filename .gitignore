@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.log
+registration.json
+*token*
+private/
+
