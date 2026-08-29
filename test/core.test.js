@@ -6,6 +6,8 @@ assert.equal(solveVerificationChallenge("twelve plus seven"), "19.00");
 assert.equal(solveVerificationChallenge("25 plus 15 gives the total"), "40.00");
 assert.equal(solveVerificationChallenge("35 decreases by 12; what is the new speed?"), "23.00");
 assert.equal(solveVerificationDetailed("3 times 5").checksAgree, true);
+assert.equal(solveVerificationChallenge("Force is 25 and leverage triples it. What is the total?"), "75.00");
+assert.equal(solveVerificationChallenge("Force is 30 * 4. What is the total?"), "120.00");
 assert.throws(() => solveVerificationChallenge("twelve maybe seven"));
 assert.throws(() => solveVerificationChallenge("one lobster has twenty plus five"));
 
