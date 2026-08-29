@@ -14,6 +14,8 @@ This repository intentionally contains no credentials, private logs, personal da
 - duplicate-reply prevention using parent-comment identity
 - newest-unanswered parent-comment targeting
 - summary-like reply rejection
+- explicit `support`, `challenge`, or `clarify` stance validation
+- rejection of challenges without a testable basis
 - own-content upvote prevention
 - required-link validation for queued posts
 - isolated step execution so one failed action does not abort a cycle
