@@ -1,5 +1,5 @@
 const assert = require("assert");
-const { solveVerificationChallenge, scoreDecision, makeAbstentionReceipt, evidenceState } = require("../src/core");
+const { solveVerificationChallenge, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, mayUpvote, hasRequiredLinks, safeStep } = require("../src/core");
 
 assert.equal(solveVerificationChallenge("swims at twenty three meters and accelerates by five"), "28.00");
 assert.equal(solveVerificationChallenge("twelve plus seven"), "19.00");
@@ -16,5 +16,23 @@ assert.equal(evidenceState({ delivered: true }).claim, "delivery_only");
 assert.equal(evidenceState({ delivered: true, visible: true }).claim, "visible_not_causal");
 assert.equal(evidenceState({ delivered: true, visible: true, causal: true }).claim, "causal_evidence");
 
-console.log("All Kongens Handler Core tests passed.");
+const claims = [{ postId: "post-1", claim: "answer-a", parentId: "comment-1" }];
+assert.equal(alreadyClaimed(claims, { postId: "post-1", claim: "answer-b", parentId: "comment-1" }), true);
+assert.equal(alreadyClaimed(claims, { postId: "post-1", claim: "answer-a", parentId: "comment-2" }), true);
+assert.equal(alreadyClaimed(claims, { postId: "post-2", claim: "answer-a", parentId: "comment-2" }), false);
+
+assert.equal(mayUpvote({ actorId: "agent", authorId: "agent", fullyRead: true, useful: true }), false);
+assert.equal(mayUpvote({ actorId: "agent", authorId: "peer", fullyRead: true, useful: true }), true);
+assert.equal(mayUpvote({ actorId: "agent", authorId: "peer", fullyRead: false, useful: true }), false);
+
+assert.equal(hasRequiredLinks("Review https://example.test/issue", ["https://example.test/issue"]), true);
+assert.equal(hasRequiredLinks("Review the issue", ["https://example.test/issue"]), false);
+
+(async () => {
+  assert.equal((await safeStep("ok", async () => 42)).value, 42);
+  const failed = await safeStep("broken", async () => { throw new Error("boom"); });
+  assert.equal(failed.ok, false);
+  assert.equal(failed.error, "boom");
+  console.log("All Kongens Handler Core tests passed.");
+})().catch(error => { console.error(error); process.exitCode = 1; });
 
