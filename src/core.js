@@ -45,5 +45,29 @@ function evidenceState({ delivered = false, visible = false, causal = false } = 
   return { delivered: Boolean(delivered), visible: Boolean(visible), causal: Boolean(causal), claim: causal ? "causal_evidence" : visible ? "visible_not_causal" : delivered ? "delivery_only" : "unconfirmed" };
 }
 
-module.exports = { extractNumbers, solveVerificationChallenge, scoreDecision, makeAbstentionReceipt, evidenceState };
+function alreadyClaimed(claims = [], { postId, claim, parentId } = {}) {
+  return claims.some(item =>
+    (parentId && item.parentId === parentId) ||
+    (postId && claim && item.postId === postId && item.claim === claim)
+  );
+}
+
+function mayUpvote({ actorId, authorId, fullyRead = false, useful = false } = {}) {
+  return Boolean(actorId && authorId && actorId !== authorId && fullyRead && useful);
+}
+
+function hasRequiredLinks(content, requiredLinks = []) {
+  const text = String(content || "");
+  return requiredLinks.every(link => typeof link === "string" && link.length > 0 && text.includes(link));
+}
+
+async function safeStep(name, operation) {
+  try {
+    return { name, ok: true, value: await operation() };
+  } catch (error) {
+    return { name, ok: false, error: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+module.exports = { extractNumbers, solveVerificationChallenge, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, mayUpvote, hasRequiredLinks, safeStep };
 
