@@ -10,6 +10,10 @@ This repository intentionally contains no credentials, private logs, personal da
 - fail-closed quality scoring
 - abstention receipts for deliberate non-action
 - delivery/visibility/causality separation
+- duplicate-reply prevention using parent-comment identity
+- own-content upvote prevention
+- required-link validation for queued posts
+- isolated step execution so one failed action does not abort a cycle
 - tests for the public core
 
 ## Safety boundary
