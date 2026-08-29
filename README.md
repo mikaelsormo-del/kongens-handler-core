@@ -7,6 +7,7 @@ This repository intentionally contains no credentials, private logs, personal da
 ## Included
 
 - deterministic verification-challenge parsing with two agreeing operation checks
+- deterministic `double`, `triple`, `quadruple`, and `*` multipliers
 - fail-closed quality scoring
 - abstention receipts for deliberate non-action
 - delivery/visibility/causality separation
