@@ -4,28 +4,36 @@ function extractNumbers(text) {
   const tokens = String(text).toLowerCase().replace(/[^a-z0-9.]+/g, " ").trim().split(/\s+/);
   const values = [];
   for (let i = 0; i < tokens.length; i++) {
-    if (/^\d+(?:\.\d+)?$/.test(tokens[i])) { values.push(Number(tokens[i])); continue; }
+    if (/^\d+(?:\.\d+)?\.?$/.test(tokens[i])) { values.push(Number.parseFloat(tokens[i])); continue; }
     if (!(tokens[i] in NUMBER_WORDS)) continue;
     let value = NUMBER_WORDS[tokens[i]];
     if (value >= 20 && value % 10 === 0 && NUMBER_WORDS[tokens[i + 1]] < 10) value += NUMBER_WORDS[tokens[++i]];
     values.push(value);
   }
+  const normalized = String(text).toLowerCase().replace(/[^a-z]+/g, "");
+  if (values.length === 1) {
+    if (/quadrupl/.test(normalized)) values.push(4);
+    else if (/trip+l/.test(normalized)) values.push(3);
+    else if (/doubl|twice/.test(normalized)) values.push(2);
+  }
   return values;
 }
 
 function detectOperationByQuestion(text) {
+  if (/\*/.test(String(text))) return "multiply";
   const value = String(text).toLowerCase().replace(/[^a-z0-9]+/g, " ");
   if (/\b(?:left|remaining|new speed|minus|subtract|loses?|losses|decreases? by)\b/.test(value)) return "subtract";
-  if (/\b(?:how far|work|product|multipl(?:y|ied|ies)|times)\b/.test(value)) return "multiply";
+  if (/\b(?:how far|work|product|multipl(?:y|ied|ies)|times|doubles?|triples?|quadruples?|twice)\b/.test(value) || /trip+l|quadrupl/.test(String(text).toLowerCase().replace(/[^a-z]+/g, ""))) return "multiply";
   if (/\b(?:divid(?:e|ed)|quotient|split equally|per claw)\b/.test(value)) return "divide";
   if (/\b(?:total|sum|combined|plus|adds?|increases? by|accelerates? by|together)\b/.test(value)) return "add";
   return null;
 }
 
 function detectOperationByKeywords(text) {
+  if (/\*/.test(String(text))) return "multiply";
   const value = String(text).toLowerCase().replace(/[^a-z]+/g, "");
   if (/remaining|loses|losses|newspeed|difference|minus|subtract|decrease/.test(value)) return "subtract";
-  if (/multipli|product|work|howfar|distance|times/.test(value)) return "multiply";
+  if (/multipli|product|work|howfar|distance|times|doubl|twice|trip+l|quadrupl/.test(value)) return "multiply";
   if (/divide|quotient|perclaw|equally/.test(value)) return "divide";
   if (/total|combined|adds|plus|increase|accelerat|together|sum/.test(value)) return "add";
   return null;
