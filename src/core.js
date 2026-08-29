@@ -13,17 +13,41 @@ function extractNumbers(text) {
   return values;
 }
 
-function solveVerificationChallenge(text) {
+function detectOperationByQuestion(text) {
+  const value = String(text).toLowerCase().replace(/[^a-z0-9]+/g, " ");
+  if (/\b(?:left|remaining|new speed|minus|subtract|loses?|losses|decreases? by)\b/.test(value)) return "subtract";
+  if (/\b(?:how far|work|product|multipl(?:y|ied|ies)|times)\b/.test(value)) return "multiply";
+  if (/\b(?:divid(?:e|ed)|quotient|split equally|per claw)\b/.test(value)) return "divide";
+  if (/\b(?:total|sum|combined|plus|adds?|increases? by|accelerates? by|together)\b/.test(value)) return "add";
+  return null;
+}
+
+function detectOperationByKeywords(text) {
+  const value = String(text).toLowerCase().replace(/[^a-z]+/g, "");
+  if (/remaining|loses|losses|newspeed|difference|minus|subtract|decrease/.test(value)) return "subtract";
+  if (/multipli|product|work|howfar|distance|times/.test(value)) return "multiply";
+  if (/divide|quotient|perclaw|equally/.test(value)) return "divide";
+  if (/total|combined|adds|plus|increase|accelerat|together|sum/.test(value)) return "add";
+  return null;
+}
+
+function calculate(operation, a, b) {
+  return operation === "add" ? a + b : operation === "subtract" ? a - b : operation === "multiply" ? a * b : operation === "divide" ? a / b : NaN;
+}
+
+function solveVerificationDetailed(text) {
   const numbers = extractNumbers(text);
-  if (numbers.length < 2) throw new Error("Challenge is not safely understood");
-  const normalized = String(text).toLowerCase().replace(/[^a-z]+/g, "");
-  let answer;
-  if (/accelerat|increase|add|plus|sum|total|combined|together/.test(normalized)) answer = numbers[0] + numbers[1];
-  else if (/decreas|subtract|difference|remain|left/.test(normalized)) answer = numbers[0] - numbers[1];
-  else if (/multiply|product|times/.test(normalized)) answer = numbers[0] * numbers[1];
-  else if (/divide|quotient|pergroup/.test(normalized)) answer = numbers[0] / numbers[1];
-  else throw new Error("Operator is ambiguous; fail closed");
-  return answer.toFixed(2);
+  if (numbers.length !== 2) throw new Error("Challenge must contain exactly two operands");
+  const first = detectOperationByQuestion(text);
+  const second = detectOperationByKeywords(text);
+  if (!first || first !== second) throw new Error("Independent operation checks disagreed");
+  const answer = calculate(first, numbers[0], numbers[1]);
+  if (!Number.isFinite(answer)) throw new Error("Challenge result was not finite");
+  return { operands: numbers, operation: first, answer: answer.toFixed(2), checksAgree: true };
+}
+
+function solveVerificationChallenge(text) {
+  return solveVerificationDetailed(text).answer;
 }
 
 function scoreDecision(decision, minimum = 10) {
@@ -69,5 +93,5 @@ async function safeStep(name, operation) {
   }
 }
 
-module.exports = { extractNumbers, solveVerificationChallenge, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, mayUpvote, hasRequiredLinks, safeStep };
+module.exports = { extractNumbers, solveVerificationChallenge, solveVerificationDetailed, scoreDecision, makeAbstentionReceipt, evidenceState, alreadyClaimed, mayUpvote, hasRequiredLinks, safeStep };
 
